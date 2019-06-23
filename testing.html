@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Project</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<script src="modernizr.custom.40753.js"></script>
+<link rel="stylesheet" href="jquery.mobile-1.4.5.css">
+<script src="jquery-1.11.3.min.js"></script>
+<script src="jquery.mobile-1.4.5.js"></script>
+  <!--Nivo Slider-->
+  <link rel="stylesheet" href="nivo-slider/themes/default/default.css">
+  <link rel="stylesheet" href="nivo-slider/nivo-slider.css">
+  <script src="nivo-slider/jquery.nivo.slider.pack.js" type="text/javascript"></script>
+<link rel="stylesheet" href="styles.css">
+<script src="http://maps.googleapis.com/maps/api/js?sensor=true&key=AIzaSyDE6HxuilTAHLb1_3AEtmamgELGscJYcsE"></script>
+<script>
+  var arr = [{title:'Marina Bay Sands',
+            address:'10 Bayfront Ave',
+            lat: 1.2833965,
+            lng: 103.8607526,
+            icon:'pin.png'},
+            {title:'Universal Studios Singapore',
+            address:'8 Sentosa Gateway',
+            lat:1.256752,
+            lng:103.820331,
+            icon:'pin.png'},
+            {title:'Singapore Flyer',
+            address:'30 Raffles Ave',
+            lat:1.2895301,
+            lng:103.8632483,
+            icon:'pin.png'},
+            {title:'Merlion Park',
+            address:'1 Fullerton Rd',
+            lat:1.2856406,
+            lng:103.8539179,
+            icon:'pin.png'},
+            {title:'Jewel Changi Airport',
+            address:'78 Airport Blvd',
+            lat:1.3596424,
+            lng:103.9894983,
+            icon:'pin.png'},
+            {title:'Singapore Zoo',
+            address:'80 Mandai Lake Rd',
+            lat:1.4035948,
+            lng:103.7906722,
+            icon:'pin.png'},
+            {title:'Singapore Discovery Centre',
+            address:'510 Upper Jurong Rd',
+            lat:1.332714,
+            lng:103.678929,
+            icon:'pin.png'},
+          ]; 
+
+// checks whether phonegap has been loaded, triggers
+// callback
+
+function addMarker(map){
+  console.log("add markers to map")
+  for(var i=0; i<arr.length; i++){
+    var lat = arr[i].lat;
+    var lng = arr[i].lng;
+    var marker = new google.maps.Marker({
+      position:{lat:lat, lng:lng},
+      map: map,
+      title: arr[i].title,
+      icon: "icons/" + arr[i].icon,
+      draggable: true
+    });
+    //add infowindow
+    //add listener for info window
+    var title = arr[i].title;
+                  var address = arr[i].address;
+                  marker.content = title + "<br>" + address;
+                  var infowindow = new google.maps.InfoWindow();
+                  google.maps.event.addListener(marker, 'click', (function(marker) {
+                      return function() {
+                       if (marker.getAnimation() !== null) {
+                               marker.setAnimation(null);
+                           } else {
+                             marker.setAnimation(google.maps.Animation.BOUNCE);
+                           }
+                          infowindow.setContent(marker.content);
+                          infowindow.open(map, marker);     
+                    }
+                  })(marker));
+  }
+}
+
+document.addEventListener('deviceready',onDeviceReady,false);
+function onDeviceReady()
+{
+     alert('device is ready');
+     //retrieves geolocation coordinates
+     navigator.geolocation.getCurrentPosition(onSuccess,onError);
+}
+
+function onSuccess(position)
+{
+    // alert('onsuccess');
+  $('#container').html("<h3>Latitude is:" + position.coords.latitude + '<p>Longitude:' + position.coords.longitude +'<p>altitude:'+ position.coords.altitude + "<p>Speed:" + position.coords.speed  + "<p>Timestamp:" + position.timestamp +   "</h3>");
+
+     var latlong = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+    // var latlong = {lat:position.coords.latitude, lng:position.coords.longitude}; //this and the one above is the same
+     var mapProp = {
+            center:latlong, //{lat: 1.3083, lng: 103.7776}, latlong will give you your location, the one will bring the map to a specific
+            zoom:0,
+            mapTypeId:google.maps.MapTypeId.ROADMAP
+     };
+     var map = new google.maps.Map(document.getElementById('map-canvas'), mapProp);
+
+     addMarker(map);
+
+      var markerOne = new google.maps.Marker({
+        position: latlong,
+        map: map,
+        title:'Singapore polytechnic'
+      });
+      //allow marker to be clicked
+      var infoWindow = new google.maps.InfoWindow({
+        content: "<h3>Singapore Polytechnic</h3><p>Singapore first polytechnic. Visit our website</p><a href = http://www.sp.edu.sg>Website</a>"
+      });
+      markerOne.addListener("click", function(){
+        infoWindow.open(map,markerOne);
+      });
+      console.log("success");
+
+      var markerTwo = new google.maps.Marker({
+        position: {lat:1.315171, lng:103.764261},
+        map: map,
+        title:'Clementi Mall'
+      });
+
+}
+
+function onError(error)
+{
+    alert('error getting currentposition');
+}
+
+
+$(document).on("pagecreate","#pageone",function(){
+    // alert('pagecreate');
+    console.log('pagecreate');
+    //this is a map based on your current location
+    // navigator.geolocation.getCurrentPosition(onSuccess,onError);
+    //this map is at the specific location
+        var map = new google.maps.Map(document.getElementById('map-canvas'), {
+  center: {lat: 1.371899, lng: 103.814108},
+  zoom: 11
+});
+addMarker(map);
+ var map;
+  map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: -34.397, lng: 150.644},
+          zoom: 11}); 
+}); //dont comment this away if not the map wont show up
+
+  //Page Two
+    $(document).on("pagecreate", "#pagetwo", function () {
+      console.log('test');
+      $('#btn').on('tap', function () {
+        //read the country code textfield 
+        var countryCode = $('#countryCode').val();
+        getRate(countryCode);
+      })
+
+      $('#btnGetWeather').on('tap', function () {
+        //read the weather textfield 
+        var city = $('#txtCity').val();
+        getWeather(city);
+
+        // 
+      })
+
+      $('#btnGetCoord').on('tap', function () {
+        var address = $('#txtAddress').val();
+        getCoord(address);
+      })
+
+    });
+
+    function getCoord(address) {
+      console.log("Get Coords" + address);
+      var url = "https://maps.googleapis.com/maps/api/geocode/json";
+      //output 
+      //"lat" : 40.714232,
+      //"lng" : -73.9612889
+      var data = {
+        address: address,
+        key: "AIzaSyD7WcthdB_FxP0wUX1rRgJCDHiw2IpqUz0"
+      };
+      $.getJSON(url, data, function (obj) {
+        console.log("coords");
+        console.log(JSON.stringify(obj));
+        var lat = obj.results[0].geometry.location.lat;
+        var lng = obj.results[0].geometry.location.lng;
+        $('#result').html("<br> Lat: " + lat + "<br> Lng: " + lng);
+      }
+
+      )
+    }
+
+
+
+
+
+    function getWeather(city) {
+      console.log('getweather' + city);
+      var url = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&APPID=f106294898b81609f85ff59806df6d07";
+      $.getJSON(url, function (obj) {
+        console.log(JSON.stringify(obj));
+        var main = obj.weather[0].main;
+        var icon = obj.weather[0].icon;
+        var test = obj.base;
+        var imgStr = "<img src = http://openweathermap.org/img/w/" + icon + ".png>";
+        var description = obj.weather[0].description;
+        $('#result').html("Main" + main + "<br>" + "Description: " + " " + description + "<br>" + imgStr + "<br>" + test);
+
+        /*access_key: "f106294898b81609f85ff59806df6d07", 
+        symbols: countryCode,
+        base:"SGD"},
+        function(obj){
+          */
+
+        // var rate = obj.rates.USD;
+        // or // var rate = obj.rates("USD");
+
+      })
+    }
+
+    function getRate(countryCode) {
+      // everything aft the ? mark is a query string, this is data passed to the server
+      // var url = "http://data.fixer.io/api/latest?access_key=64a63c875765d3afc14fe86c0905c420&base=0&symbols=" + countryCode;
+      // $.getJSON(url, function(obj){
+      //     console.log('getJSON');
+      //     console.log(JSON.stringify(obj));
+      //     // var rate = obj.rates.USD;
+      //     // or // var rate = obj.rates("USD");
+      //     var rate = obj.rates[countryCode];
+      //     $('#result').html("<h3>The rate for " + countryCode + " " + "is" + " " + rate + "</h3>");
+      // })
+
+      // alternative syntax //
+      console.log('get rate ' + countryCode);
+      var url = "http://data.fixer.io/api/latest"
+      $.getJSON(url,
+        {
+          access_key: "64a63c875765d3afc14fe86c0905c420",
+          symbols: countryCode,
+          base: "EUR"
+        },
+        function (obj) {
+          console.log('getJSON');
+          console.log(JSON.stringify(obj));
+          // var rate = obj.rates.USD;
+          // or // var rate = obj.rates("USD");
+          var rate = obj.rates[countryCode];
+          $('#result').html("<h3>The rate for " + countryCode + " " + "is" + " " + rate + "</h3>");
+        })
+    }
+</script>
+</head>
+
+
+<body>
+  
+        <div data-role="page" id="pageone">
+            <!--Panel-->
+            <div data-role="panel" id="myPanel">
+              <h3><a href = "#pageone">Map</h3></a>
+              <h3><a href = "#pagetwo">Currency Convertor</h3></a>
+              <h3><a href = "#pagethree">Landmarks</h3></a>
+              <h3><a href = "#pagethree">Useful Info</h3></a>
+            </div>
+          
+            <!--Header-->
+            <div data-role = "header">
+              <a href = "#myPanel" class = "ui-btn ui-btn-inline">Menu</a>
+              <h1>Map</h1>
+              
+            </div>
+          
+            <!--Container/Content-->   
+            <div data-role="main" class="ui-content">
+                <div id='container'></div>
+                <!-- this is for the map container -->
+              <div id='content'>
+              <div id='map-canvas'></div>
+              </div>
+              <div id="map"></div>
+          
+            </div>
+          </div>
+            
+          
+          <div data-role="page" id="pagetwo">
+            <div data-role="panel" id="myPanel">
+              <h3><a href = "#pageone">Map</h3></a>
+              <h3><a href = "#pagetwo">Currency Convertor</h3></a>
+              <h3><a href = "#pagethree">Landmarks</h3></a>
+              <h3><a href = "#pagefour">Useful Information and Contact Numbers</h3></a>
+            </div>
+        
+              <div data-role="header">
+                <a href = "#myPanel" class="ui-btn ui-btn-inline">Menu</a>  
+                 <h1>Currency and Weather Check</h1>
+               </div>
+        
+          <div data-role="main" class="ui-content">
+              <p> Check your currency!
+              <label for="countryCode" >Enter Country Code</label>
+              <input type = "text" id="countryCode"placeholder="Eg. SGD, EUR, USD">
+              <button id="btn">Get rates</button>
+        
+              <br>
+              <label for="txtCity">Enter City</label>
+              <input type = "text" id="txtCity"placeholder="Eg. Singapore, Mumbai, California">
+              <button id="btnGetWeather">Get Weather</button>
+              
+              <!-- <br>
+              <label for="txtAddress">Enter Address</label>
+              <input type = "text" id="txtAddress"placeholder="Eg. Singapore Zoo">
+              <button id="btnGetCoord">Get Coordinates</button> -->
+              <div id = 'result'></div>
+              
+             
+          </div>
+        
+        </div> 
+            <div data-role="page" id="pagethree">
+                <div data-role="panel" id="myPanel">
+                  <h3><a href = "#pageone">Map</h3></a>
+                  <h3><a href = "#pagetwo">Currency Convertor</h3></a>
+                  <h3><a href = "#pagethree">Landmarks</h3></a>
+                  <h3><a href = "#pagefour">Useful Information and Contact Numbers</h3></a>
+                </div>
+                <div data-role="header">
+                    <a href="#myPanel" class="ui-btn ui-btn-inline">Open Panel</a>  
+                   <h1>My 123Header</h1>
+                </div>
+                   <div data-role="main" class="ui-content">
+              
+              
+              
+        
+        
+              
+        
+            <div class="slider-wrapper theme-default">
+                <div id="slider" class="nivoSlider">
+                  <img src="images/photos/btt.jpg" alt="">
+                  <img src="images/photos/flyer.jpg" alt="">
+                  <img src="images/photos/gbtb2.jpg" alt="">
+                  <img src="images/photos/gbtb3.jpg" alt="">
+                  <img src="images/photos/gbtb4.jpg" alt="">
+                  <img src="images/photos/jewel.jpg" alt="">
+                  <img src="images/photos/m.jpg" alt="">
+                  <img src="images/photos/mbs.jpg" alt="">
+                  <img src="images/photos/ng.jpg" alt="">
+                  <img src="images/photos/rf.jpg" alt="">
+                  <img src="images/photos/skyline.jpg" alt="">
+                  <img src="images/photos/jewel2.jpg" alt="">
+                  <img src="images/photos/ppc.jpg" alt="">
+                  
+              
+                </div>
+                </div>
+              <article>
+          
+                <h2 id="contentstart">Famous Sightseeing Spots of Singapore</h2>
+                <h5>Click the names to learn more!</h5>
+                <figure>
+                  <img src="" alt="">
+             
+            
+                </figure>
+                <section class="aam">
+                  <div>
+                    <h3>Gardens By The Bay</h3>
+                    
+                    <p class="aamP"><br>Gardens By The Bay is Singapore's awe-inspiring 101 hectare garden, right in the heart of the city. This green space comprises three waterfront gardens - Bay South, Bay East and Bay Central.
+                    </p>
+                    
+                  </div>
+                </section>
+                <section class="cityhall">
+                  <div>
+                    <h3>Jewel, Changi Airport</h3>
+                    <p class="cityhallP"><br>Jewel Changi Airport, commonly known as Jewel, is a nature-themed entertainment and retail complex on the landside of Singapore. It houses Singapore's first Shake Shack, and fastfood outlet, A&W. It also houses the first IMAX Laser cinema in Singapore. </p>
+                  </div>
+                </section>
+                <section class="ccplaza">
+                  <div>
+                    <h3>Merlion Park, Marina Bay</h3>
+                    <p class="ccplazaP"><br>Sitting iconically at the waters edge, the Merlion in Merlion Park is just one of seven officially approved statues in Singapore. From Merlion Park, you will be able to see the beautiful Marina Bay Sands, Esplanade and Singapore Flyer.</p>
+                  </div>
+                </section>
+                <section class="unplaza">
+                  <div>
+                    <h3>Marina Bay Sands, Marina Bay</h3>
+                    <p class="unplazaP"><br>Marina Bay Sands is an iconic building, known all over the world for its unique skypark that looks like a boat sitting atop the three towers. The skypark has an infinity pool that stretches almost the whole length of the skypark, and provides panoramic view of the Singapore skyline.
+                    </p>
+                  </div>
+                </section>
+              </article>
+              <h6><a href="https://www.planetware.com/tourist-attractions/singapore-sin.htm" target="_blank">Click here for more spots!</a></h6>
+            </div>
+          </div>
+        
+          <div data-role="page" id="pagefour">
+                <div data-role="panel" id="myPanel">
+                  <h3><a href = "#pageone">Map</h3></a>
+                  <h3><a href = "#pagetwo">Currency Convertor</h3></a>
+                  <h3><a href = "#pagethree">Landmarks</h3></a>
+                  <h3><a href = "#pagefour">Useful Information and Contact Numbers</h3></a>
+                </div>
+        
+              
+              
+              <div data-role="header">
+              <a href="#myPanel" class="ui-btn ui-btn-inline">Open Panel</a>  
+              <h1>My Header</h1>
+                  </div>
+        
+                  <div data-role="main" class="ui-content">
+                      <h3><img src="https://blog.vodien.com/wp-content/uploads/2014/12/Singapore-Emergency-Contact-Numbers-blog-img-v1-735x370.png" style="width:100%;"></h3>
+                  <section>
+                    <h3 class="infoinfo">Here are some useful information regarding Singapore, incase of emergencies.</h3>
+                    <table border="0" width="100%" cellspacing="3" cellpadding="3">
+                        <thead>
+                          <tr>
+                              <th colspan="2" bgcolor="#FE2E2E">Useful Addresses</th>
+                          </tr>
+                        </thead>
+                          <tbody>
+                          <tr>
+                          <td align="left" valign="top"  width="315"><strong>American Embassy in Singapore </strong></td>
+                          <td align="left" valign="top"  width="323">27 Napier Road Singapore 258508</td>
+                          </tr>
+                          <tr>
+                          <td align="left" valign="top"><strong>Embassy of Japan in Singapore</strong></td>
+                          <td align="left" valign="top">16 Nassim Road 258390 Republic of Singapore</td>
+                          </tr>
+                          <tr>
+                          <td align="left" valign="top" ><strong>Embassy of Brazil in Singapore</strong></td>
+                          <td align="left" valign="top" >101 Thomson Road #10-05 United Square Singapore 307591 Singapore</td>
+                          </tr>
+                          <tr>
+                          <td align="left" valign="top"><strong>Embassy of Finland in Singapore</strong></td>
+                          <td align="left" valign="top">101 Thomson Road # 21-03 United Square 307591</td>
+                          </tr>
+                          <tr>
+                          <td align="left" valign="top" ><strong>Embassy of France in Singapore</strong></td>
+                          <td align="left" valign="top" >101 - 103 Cluny Park Road Singapore 259595</td>
+                          </tr>
+                          <tr>
+                          <td align="left" valign="top"><strong>Embassy of The Phillipines in Singapore</strong></td>
+                          <td align="left" valign="top">20 Nassim Road Singapore 258395 </td>
+                          </tr>
+                          <tr>
+                          <td align="left" valign="top" ><strong>Embassy of Russia in Singapore</strong></td>
+                          <td align="left" valign="top" >51 Nassim Road Singapore 1025</td>
+                          </tr>
+                      
+                          </tbody>
+                          </table>
+                  </section><br><br>
+                    <section>
+                      
+                            <table border="0" width="100%" cellspacing="3" cellpadding="3">
+                              <thead>
+                                <tr>
+                                    <th colspan="2">Singapore Emergency Contact Numbers</th>
+                                </tr>
+                              </thead>
+                                <tbody>
+                                <tr>
+                                <td align="left" valign="top"  width="315"><strong>Emergency Ambulance &amp; Fire:</strong></td>
+                                <td align="left" valign="top"  width="323">995</td>
+                                </tr>
+                                <tr>
+                                <td align="left" valign="top"><strong>Non-Emergency Ambulance:</strong></td>
+                                <td align="left" valign="top">1777</td>
+                                </tr>
+                                <tr>
+                                <td align="left" valign="top" ><strong>Police Emergency:</strong></td>
+                                <td align="left" valign="top" >999</td>
+                                </tr>
+                                <tr>
+                                <td align="left" valign="top"><strong>Police Hotline:</strong></td>
+                                <td align="left" valign="top">1800 255 0000</td>
+                                </tr>
+                                <tr>
+                                <td align="left" valign="top" ><strong>Dengue Hotline: </strong></td>
+                                <td align="left" valign="top" >1800 933 6483</td>
+                                </tr>
+                                <tr>
+                                <td align="left" valign="top"><strong>Fire Hazard Reporting:</strong></td>
+                                <td align="left" valign="top">1800 280 0000</td>
+                                </tr>
+                                <tr>
+                                <td align="left" valign="top" ><strong>SCDF General Enquiries:</strong></td>
+                                <td align="left" valign="top" >1800 286 5555</td>
+                                </tr>
+                                <tr>
+                                <td align="left" valign="top"><strong>AVA Hotline:</strong></td>
+                                <td align="left" valign="top">1800 226 2250</td>
+                                </tr>
+                                <tr>
+                                <td align="left" valign="top" ><strong>SP PowerGrid:<br />
+                                (to report a power failure)<br />
+                                </strong></td>
+                                <td align="left" valign="top" >1800 778 8888</td>
+                                </tr>
+                                <tr>
+                                <td align="left" valign="top"><strong>NEA Hotline: </strong></td>
+                                <td align="left" valign="top">1800 225 5632</td>
+                                </tr>
+                                <tr>
+                                <td align="left" valign="top" ><strong>Floods or Drain Obstructions:</strong></td>
+                                <td align="left" valign="top" >1800 284 6600</td>
+                                </tr>
+                                <tr>
+                                <td align="left" valign="top"><strong>Building &amp; Construction Authority:</strong></td>
+                                <td align="left" valign="top">6325 7191 /<br />
+                                6325 7393</td>
+                                </tr>
+                                <tr>
+                                <td align="left" valign="top" ><strong>HDB Essential Maintenance Service Unit (ESMU):</strong></td>
+                                <td align="left" valign="top" >1800 275 5555 /<br />
+                                1800 325 8888 / 1800 354 3333</td>
+                                </tr>
+                                <tr>
+                                <td align="left" valign="top"><strong>Drugs &amp; Poison:<br />
+                                (non-emergency)</strong></td>
+                                <td align="left" valign="top">6423 9119</td>
+                                </tr>
+                                <tr>
+                                <td align="left" valign="top" ><strong>Weather:</strong></td>
+                                <td align="left" valign="top" >6542 7788</td>
+                                </tr>
+                                <tr>
+                                <td align="left" valign="top"><strong>City Gas :<br />
+                                (for any issues regarding gas leakages, or disruptions)</strong></td>
+                                <td align="left" valign="top">1800 752 1800</td>
+                                </tr>
+                                </tbody>
+                                </table>
+                         </section>
+                         </div>
+                
+        </body>
+        
+
+
+        <script>
+        
+    $(window).on('load', function() {
+            $('#slider').nivoSlider({
+                effect: 'fade', //Specify sets like: 'fold,fade,sliceDown'
+                slices: 15,
+                animSpeed: 600, //Slide transition speed
+                pauseTime: 8000,
+                startSlide: 0, //Set starting Slide (0 index)
+                directionNav: true, //Next & Prev
+                directionNavHide: true, //Only show on hover
+                controlNav: true, //1,2,3...
+                controlNavThumbs: false, //Use thumbnails for Control Nav
+                controlNavThumbsFromRel: false, //Use image rel for thumbs
+                controlNavThumbsSearch: '.jpg', //Replace this with...
+                controlNavThumbsReplace: '_thumb.jpg', //...this in thumb Image src
+                keyboardNav: true, //Use left & right arrows
+                pauseOnHover: false, //Stop animation while hovering
+                manualAdvance: false, //Force manual transitions
+                captionOpacity: 0.8, //Universal caption opacity
+                beforeChange: function () { },
+                afterChange: function () { },
+                slideshowEnd: function () { }, //Triggers after all slides have been shown
+                lastSlide: function () { }, //Triggers when last slide is shown
+                afterLoad: function () { } //Triggers when slider has loaded
+              });
+            });
+
+
+      var aamHeader = document.querySelector(".aam h3");
+      var aamPara = document.querySelector(".aam p");
+      var cityhallHeader = document.querySelector(".cityhall h3");
+      var cityhallPara = document.querySelector(".cityhall p");
+      var ccplazaHeader = document.querySelector(".ccplaza h3");
+      var ccplazaPara = document.querySelector(".ccplaza p");
+      var unplazaHeader = document.querySelector(".unplaza h3");
+      var unplazaPara = document.querySelector(".unplaza p");
+
+
+
+
+
+      var figImg = document.querySelector("figure img");
+      var figCaption = document.querySelector("figcaption");
+
+      function showAam() {
+        aamPara.className = "show";
+        cityhallPara.classname = "cityhallP";
+        ccplazaPara.classname = "ccplazaP";
+        unplazaPara.classname = "unplazaP";
+        figImg.src = "images/photos/gbtb.jpg";
+        figImg.alt = "Gardens By The Bay";
+        figCaption.textContent = "Supertrees, Gardens By The Bay";
+      }
+      function showCityhall() {
+        aamPara.className = "aamP";
+        cityhallPara.className = "show";
+        ccplazaPara.className = "ccplazaP";
+        unplazaPara.className = "unplazaP";
+        figImg.src = "images/photos/jewel2.jpg";
+        figImg.alt = "Jewel";
+        figCaption.textContent = "Jewel, Changi Airport";
+      }
+
+      function showCcPlaza() {
+        aamPara.className = "aamP";
+        cityhallPara.className = "cityhallP";
+        ccplazaPara.className = "show";
+        unplazaPara.className = "unplazaP";
+        figImg.src = "images/photos/m.jpg";
+        figImg.alt = "Merlion";
+        figCaption.textContent = "Merlion Park, Marina Bay";
+      }
+      function showUnPlaza() {
+        aamPara.className = "aamP";
+        cityhallPara.className = "cityhallP";
+        ccplazaPara.className = "ccplazaP";
+        unplazaPara.className = "show";
+        figImg.src = "images/photos/mbs.jpg";
+        figImg.alt = "National Gallery";
+        figCaption.textContent = "Marina Bay Sands, Marina Bay";
+      }
+      aamHeader.addEventListener("click", showAam);
+      cityhallHeader.addEventListener("click", showCityhall);
+      ccplazaHeader.addEventListener("click", showCcPlaza);
+      unplazaHeader.addEventListener("click", showUnPlaza);
+
+
+      var navButton = document.querySelector(".navigation-menu-button img");
+      if (navButton.addEventListener) {
+        navButton.addEventListener("click", function () {
+          var nav = document.querySelector(".sitenavigation ul");
+          if (nav.style.display === "block") {
+            nav.style.display = "";
+          } else {
+            nav.style.display = "block";
+          }
+        }, false);
+      }
+
+            </script>
+</html>
